@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Display a map</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <link href='https://api.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://api.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.js'></script>
+    <script src='https://api.mapbox.com/mapbox.js/plugins/turf/v3.0.11/turf.min.js'></script>
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+<script>
+
+    var crimeURL = 'https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Public_Safety_WebMercator/MapServer/24/query?where=1%3D1&outFields=CRIMEID,REPORTDATE,ADDRESS,LATITUDE,LONGITUDE,MAJORINJURIES_BICYCLIST,MINORINJURIES_BICYCLIST,UNKNOWNINJURIES_BICYCLIST,FATAL_BICYCLIST,MAJORINJURIES_DRIVER,MINORINJURIES_DRIVER,UNKNOWNINJURIES_DRIVER,FATAL_DRIVER,MAJORINJURIES_PEDESTRIAN,MINORINJURIES_PEDESTRIAN,UNKNOWNINJURIES_PEDESTRIAN,FATAL_PEDESTRIAN&outSR=4326&f=geojson';
+    var bikeURL = 'https://opendata.arcgis.com/datasets/5b0d63150e2c4c47b5b21db73a4fd928_3.geojson'
+    mapboxgl.accessToken = 'pk.eyJ1IjoicGpsZW9uYXJkMzciLCJhIjoic2YyV2luUSJ9.lPoix24JhyR8sljAwjHg9A';
+    var map = new mapboxgl.Map({
+      container: 'map', // container id
+      style: 'mapbox://styles/pjleonard37/ck1wcxon58odr1cnzw3eh7f8b', // stylesheet location
+      center: [-77.03637, 38.89511], // starting position
+      zoom: 12 // starting zoom
+    });
+
+    // colors to use for the categories
+    var colors = ['#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02','#000000'];
+
+    // bike lane types
+    var lane = ["==", ["get", "FACILITY"], 'Existing Bike Lane'];
+    var shared = ["==", ["get", "FACILITY"], 'Shared Lane'];
+    var track = ["==", ["get", "FACILITY"], 'Cycle Track'];
+    var climbing = ["==", ["get", "FACILITY"], 'Climbing Lane'];
+    var contra = ["==", ["get", "FACILITY"], 'Contraflow Bike Lane'];
+    var bus = ["==", ["get", "FACILITY"], 'Bus/Bike Lane'];
+
+    map.on('load', function() {
+        map.addSource('crime', {
+            type: 'geojson',
+            data: crimeURL
+        });
+        map.addSource('bikeLanes', {
+            type: 'geojson',
+            data: bikeURL
+        });
+        map.addLayer({
+            "id": "bikeLanes",
+            "type": "line",
+            "source": "bikeLanes",
+            "layout": {
+                "line-join": "round",
+                "line-cap": "round"
+            },
+            "paint": {
+                "line-color": ["case",
+                    lane, colors[0],
+                    shared, colors[1],
+                    track, colors[2],
+                    climbing, colors[3],
+                    contra, colors[4],
+                    bus, colors[5], colors[6]],
+                "line-width": 5
+            }
+        });
+        map.addLayer({
+            "id": "crime",
+            "type": "symbol",
+            "source": "crime",
+            "layout": {
+                "icon-image": "police-15",
+                'icon-allow-overlap': true
+            }
+        });
+        var crime = map.querySourceFeatures('crime');
+        console.log(crime);
+    });
+</script>
+
+</body>
+</html>
