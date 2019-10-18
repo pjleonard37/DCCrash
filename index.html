@@ -38,6 +38,27 @@
     var contra = ["==", ["get", "FACILITY"], 'Contraflow Bike Lane'];
     var bus = ["==", ["get", "FACILITY"], 'Bus/Bike Lane'];
 
+    //crash injury types
+    var bike = ["any", [">=", ["get", "MAJORINJURIES_BICYCLIST"], 1], [">=", ["get", "MINORINJURIES_BICYCLIST"], 1], [">=", ["get", "UNKNOWNINJURIES_BICYCLIST"], 1], [">=", ["get", "FATAL_BICYCLIST"], 1]];
+    var pedestrian = ["any", [">=", ["get", "MAJORINJURIES_PEDESTRIAN"], 1], [">=", ["get", "MINORINJURIES_PEDESTRIAN"], 1], [">=", ["get", "UNKNOWNINJURIES_PEDESTRIAN"], 1], [">=", ["get", "FATAL_PEDESTRIAN"], 1]];
+    var car = ["any", [">=", ["get", "MAJORINJURIES_DRIVER"], 1], [">=", ["get", "MINORINJURIES_DRIVER"], 1], [">=", ["get", "UNKNOWNINJURIES_DRIVER"], 1], [">=", ["get", "FATAL_DRIVER"], 1]];
+    // var point = {
+    //   "type": "Feature",
+    //   "properties": {},
+    //   "geometry": {
+    //     "type": "Point",
+    //     "coordinates": [-77.03637, 38.89511]
+    //   }
+    // };
+    // var buffered = turf.buffer(point, 0.5, 'miles');
+    // console.log(point);
+    // console.log(buffered);
+    // map.addSource('buffered', {
+    //     type: 'geojson',
+    //     data: buffered
+    // });
+
+
     map.on('load', function() {
         map.addSource('crime', {
             type: 'geojson',
@@ -47,6 +68,7 @@
             type: 'geojson',
             data: bikeURL
         });
+
         map.addLayer({
             "id": "bikeLanes",
             "type": "line",
@@ -71,12 +93,22 @@
             "type": "symbol",
             "source": "crime",
             "layout": {
-                "icon-image": "police-15",
+                "icon-image": ["case",
+                    bike, "bicycle-15",
+                    pedestrian, "pitch-15",
+                    car, "car-15", "police-15"],
                 'icon-allow-overlap': true
             }
         });
-        var crime = map.querySourceFeatures('crime');
-        console.log(crime);
+        // map.addLayer({
+        //     "id": "buffered",
+        //     "type": "fill",
+        //     "source": "buffered",
+        //     'paint': {
+        //         'fill-color': '#088',
+        //         'fill-opacity': 0.8
+        //     }
+        // });
     });
 </script>
 
