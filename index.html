@@ -42,21 +42,6 @@
     var bike = ["any", [">=", ["get", "MAJORINJURIES_BICYCLIST"], 1], [">=", ["get", "MINORINJURIES_BICYCLIST"], 1], [">=", ["get", "UNKNOWNINJURIES_BICYCLIST"], 1], [">=", ["get", "FATAL_BICYCLIST"], 1]];
     var pedestrian = ["any", [">=", ["get", "MAJORINJURIES_PEDESTRIAN"], 1], [">=", ["get", "MINORINJURIES_PEDESTRIAN"], 1], [">=", ["get", "UNKNOWNINJURIES_PEDESTRIAN"], 1], [">=", ["get", "FATAL_PEDESTRIAN"], 1]];
     var car = ["any", [">=", ["get", "MAJORINJURIES_DRIVER"], 1], [">=", ["get", "MINORINJURIES_DRIVER"], 1], [">=", ["get", "UNKNOWNINJURIES_DRIVER"], 1], [">=", ["get", "FATAL_DRIVER"], 1]];
-    // var point = {
-    //   "type": "Feature",
-    //   "properties": {},
-    //   "geometry": {
-    //     "type": "Point",
-    //     "coordinates": [-77.03637, 38.89511]
-    //   }
-    // };
-    // var buffered = turf.buffer(point, 0.5, 'miles');
-    // console.log(point);
-    // console.log(buffered);
-    // map.addSource('buffered', {
-    //     type: 'geojson',
-    //     data: buffered
-    // });
 
 
     map.on('load', function() {
@@ -64,11 +49,11 @@
             type: 'geojson',
             data: crimeURL
         });
-        map.addSource('bikeLanes', {
+        var test = map.addSource('bikeLanes', {
             type: 'geojson',
             data: bikeURL
         });
-
+        console.log(test);
         map.addLayer({
             "id": "bikeLanes",
             "type": "line",
@@ -100,15 +85,30 @@
                 'icon-allow-overlap': true
             }
         });
-        // map.addLayer({
-        //     "id": "buffered",
-        //     "type": "fill",
-        //     "source": "buffered",
-        //     'paint': {
-        //         'fill-color': '#088',
-        //         'fill-opacity': 0.8
-        //     }
-        // });
+        var point = {
+          "type": "Feature",
+          "properties": {},
+          "geometry": {
+            "type": "Point",
+            "coordinates": [-77.03637, 38.89511]
+          }
+        };
+        var buffered = turf.buffer(point, 0.5, 'miles');
+        console.log(point);
+        console.log(buffered);
+        map.addSource('buffered', {
+            type: 'geojson',
+            data: buffered
+        });
+        map.addLayer({
+            "id": "buffered",
+            "type": "fill",
+            "source": "buffered",
+            'paint': {
+                'fill-color': '#088',
+                'fill-opacity': 0.8
+            }
+        });
     });
 </script>
 
