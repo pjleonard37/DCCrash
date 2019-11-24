@@ -3,7 +3,7 @@
 
 <head>
   <meta charset='utf-8' />
-  <title>Display a map</title>
+  <title>DC Crashes</title>
   <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
   <link href='https://api.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.css' rel='stylesheet' />
   <script src='https://api.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.js'></script>
@@ -13,6 +13,7 @@
     body {
       margin: 0;
       padding: 0;
+      font-size: 12px;
     }
 
     #map {
@@ -21,12 +22,122 @@
       bottom: 0;
       width: 100%;
     }
+
+    #legend {
+      position: absolute;
+      z-index: 2;
+      background: white;
+      border: 2px solid #696969;
+      padding: 1rem;
+    }
+
+    .title {
+      font-size: 32px;
+      padding: 2rem 0;
+    }
+
+    .sub-title {
+      font-size: 20px;
+      color: #696969;
+      border-bottom: 2px solid #A9A9A9;
+      padding-bottom: .5rem;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      font-size: 16px;
+    }
+
+    li:before {
+      content: "";
+      display: block;
+      width: 20px;
+      height: 20px;
+      float: left;
+      margin: 0 6px 0 0;
+    }
+
+    .driver {
+      background: url("img/car-15.svg") no-repeat;
+    }
+
+    .biker {
+      background: url("img/bicycle-15.svg") no-repeat;
+    }
+
+    .ped {
+      background: url("img/pitch-15.svg") no-repeat;
+    }
+
+    .none {
+      background: url("img/police-15.svg") no-repeat;
+    }
+
+    .existing {
+      background: url("img/square-15.svg") no-repeat;
+      filter: invert(50%) sepia(91%) saturate(371%) hue-rotate(111deg) brightness(84%) contrast(91%);
+    }
+
+    .shared {
+      background: url("img/square-15.svg") no-repeat;
+      filter: invert(34%) sepia(32%) saturate(4261%) hue-rotate(17deg) brightness(102%) contrast(99%);
+    }
+
+    .cycle {
+      background: url("img/square-15.svg") no-repeat;
+      filter: invert(48%) sepia(9%) saturate(2176%) hue-rotate(205deg) brightness(94%) contrast(87%);
+    }
+
+    .climbing {
+      background: url("img/square-15.svg") no-repeat;
+      filter: invert(24%) sepia(76%) saturate(3148%) hue-rotate(314deg) brightness(95%) contrast(90%);
+    }
+
+    .contra {
+      background: url("img/square-15.svg") no-repeat;
+      filter: invert(58%) sepia(33%) saturate(980%) hue-rotate(46deg) brightness(92%) contrast(88%);
+    }
+
+    .busbike {
+      background: url("img/square-15.svg") no-repeat;
+      filter: invert(69%) sepia(77%) saturate(1361%) hue-rotate(2deg) brightness(93%) contrast(99%);
+    }
+
+    .unknown {
+      background: url("img/square-15.svg") no-repeat;
+      filter: invert(0%) sepia(1%) saturate(20%) hue-rotate(319deg) brightness(94%) contrast(100%);
+    }
   </style>
 </head>
 
 <body>
 
-  <div id='map'></div>
+  <div id='map'>
+    <div id='legend'>
+      <div class='sub-title'>Crash Injuries</div>
+      <ul>
+        <li class='driver'>Driver</li>
+        <li class='biker'>Bikers</li>
+        <li class='ped'>Pedestrian</li>
+        <li class='none'>None</li>
+      </ul>
+
+      <div class='sub-title'>Bike Lanes</div>
+      <ul>
+        <li class='existing'>Existing Lane</li>
+        <li class='shared'>Shared Lane</li>
+        <li class='cycle'>Cycle Track</li>
+        <li class='climbing'>Climbing Lane</li>
+        <li class='contra'>Contraflow Bike Lane</li>
+        <li class='busbike'>Bus/Bike Lane</li>
+        <li class='unknown'>Unknown</li>
+      </ul>
+    </div>
+  </div>
   <script>
     var crimeURL =
       'https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Public_Safety_WebMercator/MapServer/24/query?where=1%3D1&outFields=CRIMEID,REPORTDATE,ADDRESS,LATITUDE,LONGITUDE,MAJORINJURIES_BICYCLIST,MINORINJURIES_BICYCLIST,UNKNOWNINJURIES_BICYCLIST,FATAL_BICYCLIST,MAJORINJURIES_DRIVER,MINORINJURIES_DRIVER,UNKNOWNINJURIES_DRIVER,FATAL_DRIVER,MAJORINJURIES_PEDESTRIAN,MINORINJURIES_PEDESTRIAN,UNKNOWNINJURIES_PEDESTRIAN,FATAL_PEDESTRIAN&outSR=4326&f=geojson';
