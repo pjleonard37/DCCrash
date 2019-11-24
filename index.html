@@ -1,23 +1,35 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta charset='utf-8' />
-    <title>Display a map</title>
-    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-    <link href='https://api.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.css' rel='stylesheet' />
-    <script src='https://api.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.js'></script>
-    <script src='https://api.mapbox.com/mapbox.js/plugins/turf/v3.0.11/turf.min.js'></script>
-    <style>
-        body { margin:0; padding:0; }
-        #map { position:absolute; top:0; bottom:0; width:100%; }
-    </style>
+  <meta charset='utf-8' />
+  <title>Display a map</title>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <link href='https://api.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.css' rel='stylesheet' />
+  <script src='https://api.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.js'></script>
+  <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+  </style>
 </head>
+
 <body>
 
-<div id='map'></div>
-<script>
-
-    var crimeURL = 'https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Public_Safety_WebMercator/MapServer/24/query?where=1%3D1&outFields=CRIMEID,REPORTDATE,ADDRESS,LATITUDE,LONGITUDE,MAJORINJURIES_BICYCLIST,MINORINJURIES_BICYCLIST,UNKNOWNINJURIES_BICYCLIST,FATAL_BICYCLIST,MAJORINJURIES_DRIVER,MINORINJURIES_DRIVER,UNKNOWNINJURIES_DRIVER,FATAL_DRIVER,MAJORINJURIES_PEDESTRIAN,MINORINJURIES_PEDESTRIAN,UNKNOWNINJURIES_PEDESTRIAN,FATAL_PEDESTRIAN&outSR=4326&f=geojson';
+  <div id='map'></div>
+  <script>
+    var crimeURL =
+      'https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Public_Safety_WebMercator/MapServer/24/query?where=1%3D1&outFields=CRIMEID,REPORTDATE,ADDRESS,LATITUDE,LONGITUDE,MAJORINJURIES_BICYCLIST,MINORINJURIES_BICYCLIST,UNKNOWNINJURIES_BICYCLIST,FATAL_BICYCLIST,MAJORINJURIES_DRIVER,MINORINJURIES_DRIVER,UNKNOWNINJURIES_DRIVER,FATAL_DRIVER,MAJORINJURIES_PEDESTRIAN,MINORINJURIES_PEDESTRIAN,UNKNOWNINJURIES_PEDESTRIAN,FATAL_PEDESTRIAN&outSR=4326&f=geojson';
     var bikeURL = 'https://opendata.arcgis.com/datasets/5b0d63150e2c4c47b5b21db73a4fd928_3.geojson'
     mapboxgl.accessToken = 'pk.eyJ1IjoicGpsZW9uYXJkMzciLCJhIjoic2YyV2luUSJ9.lPoix24JhyR8sljAwjHg9A';
     var map = new mapboxgl.Map({
@@ -28,7 +40,7 @@
     });
 
     // colors to use for the categories
-    var colors = ['#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02','#000000'];
+    var colors = ['#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02', '#000000'];
 
     // bike lane types
     var lane = ["==", ["get", "FACILITY"], 'Existing Bike Lane'];
@@ -39,78 +51,92 @@
     var bus = ["==", ["get", "FACILITY"], 'Bus/Bike Lane'];
 
     //crash injury types
-    var bike = ["any", [">=", ["get", "MAJORINJURIES_BICYCLIST"], 1], [">=", ["get", "MINORINJURIES_BICYCLIST"], 1], [">=", ["get", "UNKNOWNINJURIES_BICYCLIST"], 1], [">=", ["get", "FATAL_BICYCLIST"], 1]];
-    var pedestrian = ["any", [">=", ["get", "MAJORINJURIES_PEDESTRIAN"], 1], [">=", ["get", "MINORINJURIES_PEDESTRIAN"], 1], [">=", ["get", "UNKNOWNINJURIES_PEDESTRIAN"], 1], [">=", ["get", "FATAL_PEDESTRIAN"], 1]];
-    var car = ["any", [">=", ["get", "MAJORINJURIES_DRIVER"], 1], [">=", ["get", "MINORINJURIES_DRIVER"], 1], [">=", ["get", "UNKNOWNINJURIES_DRIVER"], 1], [">=", ["get", "FATAL_DRIVER"], 1]];
-
+    var bike = ["any", [">=", ["get", "MAJORINJURIES_BICYCLIST"], 1],
+      [">=", ["get", "MINORINJURIES_BICYCLIST"], 1],
+      [">=", ["get", "UNKNOWNINJURIES_BICYCLIST"], 1],
+      [">=", ["get", "FATAL_BICYCLIST"], 1]
+    ];
+    var pedestrian = ["any", [">=", ["get", "MAJORINJURIES_PEDESTRIAN"], 1],
+      [">=", ["get", "MINORINJURIES_PEDESTRIAN"], 1],
+      [">=", ["get", "UNKNOWNINJURIES_PEDESTRIAN"], 1],
+      [">=", ["get", "FATAL_PEDESTRIAN"], 1]
+    ];
+    var car = ["any", [">=", ["get", "MAJORINJURIES_DRIVER"], 1],
+      [">=", ["get", "MINORINJURIES_DRIVER"], 1],
+      [">=", ["get", "UNKNOWNINJURIES_DRIVER"], 1],
+      [">=", ["get", "FATAL_DRIVER"], 1]
+    ];
 
     map.on('load', function() {
-        map.addSource('crime', {
-            type: 'geojson',
-            data: crimeURL
-        });
-        var test = map.addSource('bikeLanes', {
-            type: 'geojson',
-            data: bikeURL
-        });
-        console.log(test);
-        map.addLayer({
-            "id": "bikeLanes",
-            "type": "line",
-            "source": "bikeLanes",
-            "layout": {
-                "line-join": "round",
-                "line-cap": "round"
-            },
-            "paint": {
-                "line-color": ["case",
-                    lane, colors[0],
-                    shared, colors[1],
-                    track, colors[2],
-                    climbing, colors[3],
-                    contra, colors[4],
-                    bus, colors[5], colors[6]],
-                "line-width": 5
-            }
-        });
-        map.addLayer({
-            "id": "crime",
-            "type": "symbol",
-            "source": "crime",
-            "layout": {
-                "icon-image": ["case",
-                    bike, "bicycle-15",
-                    pedestrian, "pitch-15",
-                    car, "car-15", "police-15"],
-                'icon-allow-overlap': true
-            }
-        });
-        var point = {
-          "type": "Feature",
-          "properties": {},
-          "geometry": {
-            "type": "Point",
-            "coordinates": [-77.03637, 38.89511]
-          }
-        };
-        var buffered = turf.buffer(point, 0.5, 'miles');
-        console.log(point);
-        console.log(buffered);
-        map.addSource('buffered', {
-            type: 'geojson',
-            data: buffered
-        });
-        map.addLayer({
-            "id": "buffered",
-            "type": "fill",
-            "source": "buffered",
-            'paint': {
-                'fill-color': '#088',
-                'fill-opacity': 0.8
-            }
-        });
+      map.addSource('crime', {
+        type: 'geojson',
+        data: crimeURL
+      });
+      map.addSource('bikeLanes', {
+        type: 'geojson',
+        data: bikeURL
+      });
+      map.addLayer({
+        "id": "bikeLanes",
+        "type": "line",
+        "source": "bikeLanes",
+        "layout": {
+          "line-join": "round",
+          "line-cap": "round"
+        },
+        "paint": {
+          "line-color": ["case",
+            lane, colors[0],
+            shared, colors[1],
+            track, colors[2],
+            climbing, colors[3],
+            contra, colors[4],
+            bus, colors[5], colors[6]
+          ],
+          "line-width": 5
+        }
+      });
+      var crime = map.addLayer({
+        "id": "crime",
+        "type": "symbol",
+        "source": "crime",
+        "layout": {
+          "icon-image": ["case",
+            bike, "bicycle-15",
+            pedestrian, "pitch-15",
+            car, "car-15", "police-15"
+          ],
+          'icon-allow-overlap': true
+        }
+      });
+      // // Loads bike data and builds buffer of 50 meters
+      // $.getJSON(bikeURL, function(data) {
+      //   $.getJSON(crimeURL, function(crime) {
+      //     console.log(data);
+      //     var buffered = turf.buffer(data, 50, 'meters');
+      //     //var points = turf.point(crime);
+      //     console.log(buffered);
+      //     //console.log(points);
+      //     //var ptsWithin = turf.pointsWithinPolygon(crime.features, buffered);
+      //     //console.log(ptsWithin);
+      //     map.addSource('buffered', {
+      //       type: 'geojson',
+      //       data: buffered
+      //     });
+      //     map.addLayer({
+      //       "id": "buffered",
+      //       "type": "fill",
+      //       "source": "buffered",
+      //       'paint': {
+      //         'fill-color': '#088',
+      //         'fill-opacity': 0.8
+      //       }
+      //     });
+      //   });
+      // });
     });
-</script>
+  </script>
 
 </body>
+
 </html>
